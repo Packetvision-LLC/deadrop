@@ -1,0 +1,22 @@
+{
+  "name": "deadrop",
+  "version": "1.0.0",
+  "description": "SQLite-backed message queue for reliable agent-to-agent communication",
+  "main": "index.js",
+  "bin": {
+    "deadrop": "./bin/deadrop.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["openclaw", "agents", "messaging", "sqlite"],
+  "author": "Stuart Bain",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^9.0.0",
+    "sqlite3": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
