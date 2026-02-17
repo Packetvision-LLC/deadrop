@@ -215,4 +215,54 @@ program
     }
   });
 
+program
+  .command('setup-cron')
+  .description('Generate OpenClaw cron job configuration for automated inbox checking')
+  .requiredOption('--agent <agent>', 'agent name to setup cron for')
+  .option('--interval <minutes>', 'check interval in minutes', '10')
+  .action((options) => {
+    const intervalMs = parseInt(options.interval) * 60 * 1000;
+    const cronConfig = {
+      "enabled": true,
+      "name": `Deadrop Inbox Check - ${options.agent}`,
+      "payload": {
+        "kind": "systemEvent",
+        "text": `deadrop check --agent ${options.agent}`
+      },
+      "schedule": {
+        "everyMs": intervalMs,
+        "kind": "every"
+      },
+      "sessionTarget": "main"
+    };
+
+    console.log('📋 OpenClaw cron job configuration:');
+    console.log('Copy this JSON into your OpenClaw config or use the cron API:');
+    console.log('');
+    console.log(JSON.stringify(cronConfig, null, 2));
+    console.log('');
+    console.log('💡 To add via OpenClaw cron API:');
+    console.log('cron add --job \'<paste JSON above>\'');
+    console.log('');
+    console.log(`⏰ This will check for messages every ${options.interval} minutes`);
+  });
+
+program
+  .command('remove-cron')
+  .description('Instructions for removing automated inbox checking')
+  .requiredOption('--agent <agent>', 'agent name to remove cron for')
+  .action((options) => {
+    console.log('🗑️  To remove automated inbox checking for', options.agent + ':');
+    console.log('');
+    console.log('1. List current cron jobs:');
+    console.log('   cron list');
+    console.log('');
+    console.log('2. Find the job ID for "Deadrop Inbox Check -', options.agent + '"');
+    console.log('');
+    console.log('3. Remove the job:');
+    console.log('   cron remove --jobId <job-id>');
+    console.log('');
+    console.log('💡 Or use the OpenClaw web interface to manage cron jobs');
+  });
+
 program.parse();
