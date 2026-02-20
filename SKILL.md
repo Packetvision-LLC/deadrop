@@ -64,6 +64,47 @@ deadrop inbox --agent cody
 deadrop inbox --agent cody --unread
 ```
 
+### deadrop setup-cron
+Generate OpenClaw cron job configuration for automated inbox checking.
+
+**Usage:**
+```bash
+deadrop setup-cron --agent <name> [--interval <minutes>]
+```
+
+**Parameters:**
+- `--agent` (required): Agent name for inbox monitoring
+- `--interval` (optional): Polling interval in minutes (default: 10)
+
+**Example:**
+```bash
+# Use default 10-minute interval
+deadrop setup-cron --agent ralph
+
+# Custom 15-minute interval  
+deadrop setup-cron --agent cody --interval 15
+```
+
+**Output:** JSON configuration for OpenClaw cron system
+
+### deadrop remove-cron
+Generate OpenClaw cron job removal configuration.
+
+**Usage:**
+```bash
+deadrop remove-cron --agent <name>
+```
+
+**Parameters:**
+- `--agent` (required): Agent name to stop monitoring
+
+**Example:**
+```bash
+deadrop remove-cron --agent ralph
+```
+
+**Output:** JSON configuration to remove cron job from OpenClaw
+
 ## Installation
 
 1. Clone repository
@@ -81,6 +122,7 @@ export DEADROP_DB=/custom/path/deadrop.sqlite
 
 ## Integration Pattern
 
+### Basic Messaging
 Replace timeout-prone `sessions_send` calls:
 
 **Before:**
@@ -98,12 +140,24 @@ Recipients check on their schedule:
 deadrop check --agent target
 ```
 
+### Automated Monitoring
+Set up automated inbox checking via OpenClaw cron:
+
+```bash
+# Generate cron configuration
+deadrop setup-cron --agent ralph --interval 10
+
+# Copy JSON output to OpenClaw cron jobs
+# Agent will automatically check inbox every 10 minutes
+```
+
 ## Use Cases
 
 - Task completion notifications
 - Status updates between agents
 - Async coordination messages
 - Backup communication when sessions_send fails
+- Automated inbox monitoring via OpenClaw cron
 
 ## Benefits
 
@@ -112,3 +166,4 @@ deadrop check --agent target
 - **Simple integration**: Drop-in CLI replacement
 - **Cross-session compatibility**: Works in sub-agents
 - **Message history**: Full inbox with timestamps
+- **Automated monitoring**: OpenClaw cron integration for reliable polling
