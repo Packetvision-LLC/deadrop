@@ -7,7 +7,7 @@ const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 
 const program = new Command();
-const DB_PATH = path.join(os.homedir(), '.openclaw', 'workspace', 'deadrop.sqlite');
+const DB_PATH = process.env.DEADROP_DB || path.join(os.homedir(), '.openclaw', 'workspace', 'deadrop.sqlite');
 
 // Ensure database directory exists
 const dbDir = path.dirname(DB_PATH);
