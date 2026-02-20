@@ -215,4 +215,79 @@ program
     }
   });
 
+program
+  .command('setup-cron')
+  .description('Generate OpenClaw cron job configuration for automated inbox checking')
+  .requiredOption('--agent <name>', 'agent name for inbox monitoring')
+  .option('--interval <minutes>', 'polling interval in minutes (default: 10)', '10')
+  .action((options) => {
+    try {
+      // Validate agent name
+      if (!options.agent || options.agent.trim() === '') {
+        console.error('Error: Agent name cannot be empty');
+        console.error('Please provide a valid agent name (e.g., ralph, cody, scout)');
+        process.exit(1);
+      }
+
+      // Validate and parse interval
+      const interval = parseInt(options.interval);
+      if (isNaN(interval)) {
+        console.error('Error: Interval must be a positive number (minutes)');
+        console.error('Example: deadrop setup-cron --agent ralph --interval 15');
+        process.exit(1);
+      }
+
+      if (interval <= 0) {
+        console.error('Error: Interval must be a positive number greater than 0');
+        console.error('Example: deadrop setup-cron --agent ralph --interval 15');
+        process.exit(1);
+      }
+
+      // Generate cron configuration JSON
+      const cronConfig = {
+        action: 'create',
+        type: 'cron',
+        agent: options.agent.trim(),
+        command: `deadrop check --agent ${options.agent.trim()}`,
+        interval: `${interval}m`,
+        description: `Deadrop inbox checking for agent ${options.agent.trim()}`,
+        enabled: true
+      };
+
+      console.log(JSON.stringify(cronConfig, null, 2));
+    } catch (error) {
+      console.error('❌ Error generating cron configuration:', error.message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('remove-cron')
+  .description('Generate OpenClaw cron job removal configuration')
+  .requiredOption('--agent <name>', 'agent name to stop monitoring')
+  .action((options) => {
+    try {
+      // Validate agent name
+      if (!options.agent || options.agent.trim() === '') {
+        console.error('Error: Agent name cannot be empty');
+        console.error('Please provide a valid agent name (e.g., ralph, cody, scout)');
+        process.exit(1);
+      }
+
+      // Generate cron removal configuration JSON
+      const cronConfig = {
+        action: 'delete',
+        type: 'cron',
+        agent: options.agent.trim(),
+        pattern: `deadrop check --agent ${options.agent.trim()}`,
+        description: `Remove Deadrop cron job for agent ${options.agent.trim()}`
+      };
+
+      console.log(JSON.stringify(cronConfig, null, 2));
+    } catch (error) {
+      console.error('❌ Error generating cron removal configuration:', error.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
