@@ -1,89 +1,129 @@
-# Deadrop - Inter-Agent Message Queue
+# Deadrop
+*Dead drops for AI agents*
 
-SQLite-backed message queue for reliable agent-to-agent communication. Solves session_send timeout issues by providing persistent message storage that agents can check on their own schedule.
+Deadrop is a persistent message queue for OpenClaw agents inspired by spy dead drops. When real-time agent communication fails due to timeouts or busy sessions, Deadrop ensures your messages get through.
 
 ## Features
 
-- **Persistent messages**: No more lost messages due to timeouts
-- **Simple CLI interface**: Easy integration into agent workflows  
-- **SQLite backend**: Lightweight, reliable, no daemon required
-- **Cross-agent compatibility**: Works from any agent or sub-agent
-- **Atomic operations**: Safe for concurrent access
+✅ **Persistent messaging** - messages survive session restarts  
+✅ **SQLite durability** - reliable local storage  
+✅ **CLI-first design** - simple command interface  
+✅ **Cross-session compatible** - works across agent restarts  
+✅ **ACK protocol** - acknowledgment system for reliability  
+✅ **Fallback reliability** - when direct communication fails  
 
 ## Installation
 
 ```bash
-npm install
-npm link  # Makes `deadrop` available globally
+npm install -g deadrop
 ```
 
-## Usage
+## Quick Start
 
 ### Send a message
 ```bash
 deadrop send --to cody --from larry --subject "Task Update" --body "Kraken deployment is complete"
 ```
 
-### Check for new messages (marks as read)
+### Check for new messages
 ```bash
 deadrop check --agent cody
 ```
 
-### View inbox
+Output:
+```
+📬 1 new message(s):
+
+[1] From: larry
+Subject: Task Update  
+Time: 2026-02-20T09:15:00Z
+Message: Kraken deployment is complete
+---
+```
+
+### View inbox history
 ```bash
 # All messages
 deadrop inbox --agent cody
 
-# Unread only
+# Unread only  
 deadrop inbox --agent cody --unread
 ```
 
-## Database Location
+## CLI Commands
 
-By default, messages are stored in `~/.openclaw/workspace/deadrop.sqlite`.
+| Command | Description | Example |
+|---------|-------------|---------|
+| `send` | Send a message to another agent | `deadrop send --to ralph --from cody --body "New task available"` |
+| `check` | Check for new messages (marks as read) | `deadrop check --agent ralph` |
+| `inbox` | List all messages in agent's inbox | `deadrop inbox --agent ralph --unread` |
+| `setup-cron` | Generate cron job configuration | `deadrop setup-cron --agent ralph --interval 10` |
+| `remove-cron` | Generate cron job removal config | `deadrop remove-cron --agent ralph` |
 
-To use a custom location, set the `DEADROP_DB` environment variable:
+### Advanced Usage
 
+**Custom database location:**
 ```bash
-# In your .env or shell profile
 export DEADROP_DB=/path/to/your/deadrop.sqlite
+deadrop send --to agent --from sender --body "message"
 ```
 
-The directory will be created automatically if it doesn't exist.
-
-## Schema
-
-```sql
-CREATE TABLE messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  from_agent TEXT NOT NULL,
-  to_agent TEXT NOT NULL,
-  subject TEXT,
-  body TEXT NOT NULL,
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-  read_at DATETIME
-);
-```
-
-## Integration
-
-Add to agent workflows:
-1. **Send**: Use `deadrop send` instead of `sessions_send` for important messages
-2. **Check**: Add `deadrop check --agent {name}` to heartbeat/task boundaries  
-3. **Inbox**: Periodic `deadrop inbox --agent {name}` for message history
-
-## Example Workflow
-
+**Integration with OpenClaw cron:**
 ```bash
-# Larry sends update to Cody
-deadrop send --to cody --from larry --subject "Deploy Status" --body "Production deploy successful"
+# Generate cron configuration
+deadrop setup-cron --agent ralph --interval 10
 
-# Cody checks messages during next task
-deadrop check --agent cody
-# Output: 📬 1 new message(s): [1] From: larry...
-
-# Review message history
-deadrop inbox --agent cody
+# Copy JSON output to OpenClaw cron jobs
 ```
 
-This eliminates the need to retry failed `sessions_send` calls and ensures no important inter-agent communication is lost.
+**Acknowledgment protocol:**
+```bash
+# Send acknowledgment for message ID 42
+deadrop send --to sender --from recipient --subject "ACK:42" --body "Message processed"
+```
+
+## Architecture
+
+Deadrop uses SQLite as a persistent message store, enabling reliable agent communication even when direct `sessions_send` calls fail. Messages are stored with timestamps and read status, allowing agents to process messages at their own pace.
+
+The system is designed as a fallback mechanism: agents should attempt direct communication first, then use Deadrop for guaranteed delivery. Automated inbox checking via OpenClaw cron jobs ensures timely message processing without manual intervention.
+
+## Integration Patterns
+
+### Fallback Communication
+```javascript
+// Try direct communication first
+try {
+  await sessions_send(targetAgent, message, {timeout: 15000});
+} catch (error) {
+  // Fallback to Deadrop
+  await exec(`deadrop send --to ${targetAgent} --from ${currentAgent} --body "${message}"`);
+}
+```
+
+### Automated Inbox Checking
+```bash
+# Set up automated polling every 10 minutes
+deadrop setup-cron --agent ralph --interval 10
+```
+
+For detailed integration examples and patterns, see the [documentation](docs/) folder.
+
+## Contributing
+
+We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for details on:
+
+- Code style and formatting
+- Testing requirements  
+- Pull request process
+- Issue reporting
+
+## License
+
+MIT - see [LICENSE](LICENSE) file for details.
+
+## Links
+
+- **Documentation**: [docs/](docs/) - Integration guides and setup instructions
+- **Issues**: [GitHub Issues](https://github.com/Packetvision-LLC/deadrop/issues)
+- **OpenClaw**: Learn more about the [OpenClaw](https://openclaw.ai) agent framework
