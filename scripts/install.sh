@@ -25,7 +25,7 @@ deadrop check --agent test > /dev/null
 echo ""
 echo "✨ Deadrop installation complete!"
 echo "📖 Usage: deadrop --help"
-echo "📍 Database location: ~/.openclaw/workspace/deadrop.sqlite"
+echo "📍 Database location: ~/databases/deadrop.sqlite"
 echo ""
 echo "🔄 Integration pattern:"
 echo "  Send: deadrop send --to agent --from sender --body 'message'"
