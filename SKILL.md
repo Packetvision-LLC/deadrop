@@ -72,7 +72,12 @@ deadrop inbox --agent cody --unread
 
 ## Database
 
-Messages stored in `~/.openclaw/workspace/deadrop.sqlite`
+Messages stored in `~/.openclaw/workspace/deadrop.sqlite` by default.
+
+Set `DEADROP_DB` environment variable to override:
+```bash
+export DEADROP_DB=/custom/path/deadrop.sqlite
+```
 
 ## Integration Pattern
 
