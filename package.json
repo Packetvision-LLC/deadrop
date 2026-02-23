@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "SQLite-backed message queue for reliable inter-agent communication",
   "main": "index.js",
+  "overrides": {
+    "minimatch": "^10.2.1",
+    "tar": "^7.5.8"
+  },
   "bin": {
     "deadrop": "./bin/deadrop.js"
   },
